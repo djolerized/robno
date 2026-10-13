@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Textil – Robno planiranje (prototip)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f5f3; --paper:#ffffff; --ink:#111111; --ink-2:#555; --ink-3:#8a8a8a;
+  --line:#dcdcd8; --line-2:#ececea; --red:#e3001b; --red-soft:#fdeaec; --ok:#1d7a3a; --ok-soft:#e6f3ea;
+  --warn:#9a6a00; --warn-soft:#fbf1d6; --muted-cell:#f2f2f0;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#161616; --paper:#1f1f1f; --ink:#f0f0ee; --ink-2:#b5b5b0; --ink-3:#7c7c78; --line:#3a3a38; --line-2:#2c2c2a;
+  --red-soft:#3a1a1e; --ok-soft:#173222; --warn-soft:#3a2f12; --muted-cell:#262624;
+}}
+:root[data-theme="dark"]{
+  --bg:#161616; --paper:#1f1f1f; --ink:#f0f0ee; --ink-2:#b5b5b0; --ink-3:#7c7c78; --line:#3a3a38; --line-2:#2c2c2a;
+  --red-soft:#3a1a1e; --ok-soft:#173222; --warn-soft:#3a2f12; --muted-cell:#262624;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:"Libre Baskerville",Georgia,"Times New Roman",serif;font-weight:700;margin:0}
+h1{font-size:22px} h2{font-size:19px} h3{font-size:16px}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--ink)}
+
+/* header */
+.top{background:#000;color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.top-in{max-width:1180px;margin:0 auto;padding:0 20px;height:56px;display:flex;align-items:center;gap:18px}
+.brand{font-family:"Libre Baskerville",Georgia,serif;font-weight:700;font-size:20px;letter-spacing:.02em;color:#fff;text-decoration:none}
+.brand b{color:var(--red)}
+.top .sub{color:#aaa;font-size:13px;border-left:1px solid #333;padding-left:14px}
+.spacer{flex:1}
+.who{display:flex;align-items:center;gap:8px;font-size:13px;color:#ccc}
+.who select{background:#1a1a1a;color:#fff;border:1px solid #444;border-radius:4px;padding:6px 8px}
+.who select:focus{outline:2px solid var(--red);outline-offset:1px}
+
+.wrap{max-width:1180px;margin:0 auto;padding:22px 20px 60px}
+.cycle-bar{display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--red);margin-bottom:22px}
+.cycle-bar h1{font-size:20px}
+.kv{font-size:13px;color:var(--ink-2)} .kv strong{color:var(--ink);font-weight:600}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;border:1px solid var(--line);background:var(--muted-cell);color:var(--ink-2)}
+.pill.open{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.pill.locked{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.pill.final{background:#000;color:#fff;border-color:#000}
+.pill.red{background:var(--red-soft);color:var(--red);border-color:transparent}
+.pill.draft{background:var(--muted-cell);color:var(--ink-2)}
+.pill.sent{background:#e8eefb;color:#1f4fa3;border-color:transparent}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .pill.sent{background:#1b2a44;color:#9fbcf5}}
+
+.panel{background:var(--paper);border:1px solid var(--line);margin-bottom:20px}
+.panel-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:14px 18px;border-bottom:1px solid var(--line-2)}
+.panel-h .note{font-size:13px;color:var(--ink-2)}
+.panel-b{padding:16px 18px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:3px;font-weight:500;font-size:14px}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:18px}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;color:var(--ink-2);font-weight:500}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--red)}
+
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:middle;white-space:nowrap}
+th{font-weight:600;font-size:12.5px;color:var(--ink-2);background:var(--muted-cell)}
+td.num,th.num{text-align:right}
+td.total,th.total{font-weight:600;border-left:1px solid var(--line)}
+tr.batch-row td{background:var(--paper);color:var(--ink-3);font-size:12.5px;padding-top:12px;border-bottom:0}
+td.sku{font-weight:600}
+.qty{width:74px;padding:5px 7px;border:1px solid var(--line);border-radius:3px;text-align:right;background:var(--paper)}
+.qty:disabled{background:var(--muted-cell);color:var(--ink-2)}
+.qty.corr{border-color:var(--red)}
+.orig{display:block;font-size:11px;color:var(--ink-3);text-decoration:line-through;text-align:right;margin-top:2px}
+.cell{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.cm{border:0;background:none;color:var(--ink-3);font-size:12px;padding:0 2px;line-height:1}
+.cm.has{color:var(--red);font-weight:600}
+.comments{margin:10px 0 0;padding:10px 12px;background:var(--red-soft);border-left:3px solid var(--red);font-size:13px}
+.comments div+div{margin-top:4px}
+.plain{padding:12px 0;color:var(--ink-2);font-size:14px}
+.warn-box{padding:10px 12px;background:var(--warn-soft);color:var(--warn);font-size:13px;margin-bottom:12px}
+.ok-box{padding:10px 12px;background:var(--ok-soft);color:var(--ok);font-size:13px;margin-bottom:12px}
+.sub-row td{background:var(--muted-cell);color:var(--ink-2);font-size:13px}
+.sub-row td.sku{padding-left:26px;font-weight:400}
+.expand{border:0;background:none;color:var(--ink-2);padding:0 6px 0 0;cursor:pointer}
+.status-grid td .pill{min-width:92px;text-align:center}
+.field{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink-2)}
+.field input,.field select{padding:7px 9px;border:1px solid var(--line);border-radius:3px;background:var(--paper)}
+
+/* modal */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.backdrop.on{display:flex}
+.modal{background:var(--paper);color:var(--ink);width:min(720px,100%);max-height:90vh;overflow:auto;border:1px solid var(--line);padding:22px}
+.modal h2{margin-bottom:6px}
+.modal textarea{width:100%;min-height:150px;padding:10px;border:1px solid var(--line);border-radius:3px;background:var(--paper);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.modal .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:#000;color:#fff;padding:10px 16px;border-radius:4px;font-size:14px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:60;max-width:90vw}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+.log{font-size:12.5px;color:var(--ink-2);max-height:180px;overflow:auto}
+.log div{padding:3px 0;border-bottom:1px dashed var(--line-2)}
+.demo{font-size:12px;color:var(--ink-3);margin-top:8px}
+@media (max-width:700px){.top .sub{display:none}.cycle-bar h1{font-size:18px}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="#">TEXTIL<b>.</b></a>
+    <span class="sub">Robno planiranje · prototip</span>
+    <span class="spacer"></span>
+    <label class="who">Prijavljen kao
+      <select id="whoSel"></select>
+    </label>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+
+<div class="backdrop" id="backdrop"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- state ---------- */
+const MONTHS = ['2027-01','2027-02','2027-03','2027-04','2027-05','2027-06'];
+const MLABEL = m => { const [y,mm]=m.split('-'); return ['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'][+mm-1]+' '+y.slice(2); };
+
+const S = {
+  users: {
+    mikula:{name:'Mikula', role:'nabavka'},
+    tijana:{name:'Tijana', role:'komercijalista', vodja:'milan'},
+    marko: {name:'Marko',  role:'komercijalista', vodja:'milan'},
+    milan: {name:'Milan',  role:'vodja', vodja:'pop'},
+    pop:   {name:'Pop',    role:'direktor'},
+  },
+  cycle:{ name:'Plan 2027', months:MONTHS, deadline:'2026-10-10', status:'otvoren' },
+  batches:[ {no:1, date:'2026-09-28', by:'Mikula', skus:['TX-10231','TX-10232','TX-10555','TX-11002','TX-11310']} ],
+  plan:{}, corr:{}, comments:{}, approvals:{},
+  log:[],
+  ui:{ who:'tijana', tab:'tim', teamSel:'tijana', expanded:{} }
+};
+
+function seed(){
+  const p=(u,s,vals)=>{ S.plan[u]??={}; S.plan[u][s]??={}; MONTHS.forEach((m,i)=>{ if(vals[i]!=null) S.plan[u][s][m]=vals[i]; }); };
+  p('tijana','TX-10231',[800,900,1000,600,400,200]);
+  p('tijana','TX-10232',[null,null,500,500,300,null]);
+  p('marko','TX-10231',[400,600,500,300,200,100]);
+  p('marko','TX-10555',[1200,1200,1200,800,600,600]);
+  p('marko','TX-11002',[null,300,300,300,null,null]);
+  p('milan','TX-10231',[200,200,200,200,200,200]);
+  p('milan','TX-11310',[null,null,700,700,700,null]);
+  S.approvals.marko={1:'odobreno'};
+  S.approvals.milan={1:'poslato'};
+  S.approvals.tijana={1:'draft'};
+  S.log.push('28.09. Mikula je poslao batch #1 (5 SKU)','29.09. Marko poslao plan vođi','30.09. Milan odobrio Markov plan (batch #1)','30.09. Milan poslao svoj plan direktoru');
+}
+seed();
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const me = () => S.users[S.ui.who];
+const isOpen = () => S.cycle.status==='otvoren';
+const allSkus = () => S.batches.flatMap(b=>b.skus);
+const batchOf = sku => S.batches.find(b=>b.skus.includes(sku)).no;
+const planners = () => Object.keys(S.users).filter(u=>['komercijalista','vodja'].includes(S.users[u].role));
+const teamOf = v => Object.keys(S.users).filter(u=>S.users[u].vodja===v);
+const approval = (u,b) => (S.approvals[u]?.[b]) || 'draft';
+const setApproval = (u,b,st) => { S.approvals[u]??={}; S.approvals[u][b]=st; };
+const raw = (u,s,m) => S.plan[u]?.[s]?.[m];
+const corrOf = (u,s,m) => S.corr[u]?.[s]?.[m];
+const eff = (u,s,m) => { const c=corrOf(u,s,m); return c ? c.qty : (raw(u,s,m)||0); };
+const cmts = (u,s,m) => S.comments[u]?.[s]?.[m] || [];
+const fmt = n => n ? n.toLocaleString('sr-RS') : '0';
+const today = () => new Date().toLocaleDateString('sr-RS',{day:'2-digit',month:'2-digit'});
+function logIt(t){ S.log.unshift(today()+' '+t); }
+function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),2200); }
+function pill(st){
+  const map={draft:['draft','U izradi'],poslato:['sent','Poslato'],vraceno:['red','Vraćeno'],odobreno:['open','Odobreno']};
+  const [c,l]=map[st]; return `<span class="pill ${c}">${l}</span>`;
+}
+function cyclePill(){ return {otvoren:'<span class="pill open">Otvoren</span>',zakljucan:'<span class="pill locked">Zaključan</span>',finalizovan:'<span class="pill final">Finalizovan</span>'}[S.cycle.status]; }
+function rowTotal(u,s){ return MONTHS.reduce((a,m)=>a+eff(u,s,m),0); }
+function consolidated(s,m){ return planners().reduce((a,u)=>a+eff(u,s,m),0); }
+function esc(t){ return t.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---------- render ---------- */
+function render(){
+  const sel=$('#whoSel');
+  sel.innerHTML=Object.entries(S.users).map(([k,u])=>`<option value="${k}" ${k===S.ui.who?'selected':''}>${u.name} – ${({nabavka:'nabavka',komercijalista:'komercijalista',vodja:'vođa prodaje',direktor:'direktor prodaje'})[u.role]}</option>`).join('');
+  const r=me().role;
+  let html=cycleBar();
+  if(r==='nabavka') html+=viewNabavka();
+  if(r==='komercijalista') html+=viewPlan(S.ui.who, {own:true});
+  if(r==='vodja') html+=viewVodja();
+  if(r==='direktor') html+=viewDirektor();
+  html+=viewLog();
+  $('#app').innerHTML=html;
+}
+
+function cycleBar(){
+  return `<div class="cycle-bar">
+    <h1>${S.cycle.name}</h1> ${cyclePill()}
+    <span class="kv">Period <strong>${MLABEL(MONTHS[0])} – ${MLABEL(MONTHS[MONTHS.length-1])}</strong></span>
+    <span class="kv">Rok za unos <strong>${new Date(S.cycle.deadline).toLocaleDateString('sr-RS')}</strong></span>
+    <span class="kv">SKU u ciklusu <strong>${allSkus().length}</strong> u ${S.batches.length} ${S.batches.length===1?'slanju':'slanja'}</span>
+  </div>`;
+}
+
+/* --- Mikula --- */
+function viewNabavka(){
+  const fin=S.cycle.status==='finalizovan';
+  return `<section class="panel">
+    <div class="panel-h"><h2>Slanje SKU prodaji</h2><span class="note">Upload xlsx iz alata za planiranje: prva kolona SKU, zatim meseci ${MONTHS[0]} … ${MONTHS[MONTHS.length-1]}</span>
+      <span class="spacer"></span>
+      <button class="btn red" ${isOpen()?'':'disabled'} onclick="openUpload()">Pošalji nove SKU</button></div>
+    <div class="panel-b scroll">
+      ${isOpen()?'':'<div class="warn-box">Ciklus nije otvoren — nova slanja nisu moguća.</div>'}
+      <table><thead><tr><th>Slanje</th><th>Datum</th><th>Poslao</th><th class="num">SKU</th><th>Šifre</th><th>Fajl</th></tr></thead><tbody>
+      ${S.batches.map(b=>`<tr><td>#${b.no}</td><td>${new Date(b.date).toLocaleDateString('sr-RS')}</td><td>${b.by}</td><td class="num">${b.skus.length}</td><td style="white-space:normal">${b.skus.join(', ')}</td><td><span class="pill">plan-2027_batch${b.no}.xlsx</span></td></tr>`).join('')}
+      </tbody></table>
+    </div>
+  </section>
+  <section class="panel">
+    <div class="panel-h"><h2>Finalni plan prodaje</h2><span class="note">${fin?'Direktor je finalizovao plan. Export je spreman.':'Dostupno tek kada direktor prodaje finalizuje ciklus.'}</span>
+      <span class="spacer"></span>
+      <button class="btn" ${fin?'':'disabled'} onclick="openExport()">Preuzmi plan (xlsx)</button></div>
+    ${fin?`<div class="panel-b scroll">${consolTable(false)}</div>`:''}
+  </section>`;
+}
+
+function openUpload(){
+  modal(`<h2>Pošalji nove SKU</h2>
+    <p class="plain">U produkciji ovde ide upload xlsx fajla. Za prototip nalepi šifre, jedna po redu. Meseci se preuzimaju iz zaglavlja fajla i moraju biti isti kao u ciklusu.</p>
+    <textarea id="upTa">TX-12001
+TX-12002
+TX-12088
+TX-10231</textarea>
+    <div class="actions"><button class="btn ghost" onclick="closeModal()">Otkaži</button><button class="btn red" onclick="doUpload()">Pošalji prodaji</button></div>`);
+}
+function doUpload(){
+  const lines=$('#upTa').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const exist=new Set(allSkus()); const seen=new Set(); const add=[], dup=[];
+  lines.forEach(s=>{ if(exist.has(s)||seen.has(s)) dup.push(s); else {seen.add(s); add.push(s);} });
+  if(!add.length){ toast('Nijedna nova šifra — sve su duplikati.'); return; }
+  const no=S.batches.length+1;
+  S.batches.push({no, date:new Date().toISOString().slice(0,10), by:'Mikula', skus:add});
+  planners().forEach(u=>setApproval(u,no,'draft'));
+  logIt(`Mikula poslao batch #${no} (${add.length} SKU${dup.length?`, preskočeno ${dup.length} duplikata: ${dup.join(', ')}`:''})`);
+  closeModal(); render();
+  toast(`Poslato ${add.length} SKU${dup.length?`, ${dup.length} preskočeno kao duplikat`:''}`);
+}
+function openExport(){
+  modal(`<h2>Plan-2027_final.xlsx</h2><p class="plain">Sheet 1 „Plan“ – konsolidacija. Sheet 2 „Po prodavcu“ – isti oblik plus kolona Prodavac.</p>
+    <div class="scroll">${consolTable(false)}</div>
+    <h3 style="margin:18px 0 8px">Po prodavcu</h3>
+    <div class="scroll"><table><thead><tr><th>SKU</th><th>Prodavac</th>${MONTHS.map(m=>`<th class="num">${m}</th>`).join('')}<th class="num total">Total</th></tr></thead><tbody>
+      ${allSkus().flatMap(s=>planners().filter(u=>rowTotal(u,s)>0).map(u=>`<tr><td class="sku">${s}</td><td>${S.users[u].name}</td>${MONTHS.map(m=>`<td class="num">${fmt(eff(u,s,m))}</td>`).join('')}<td class="num total">${fmt(rowTotal(u,s))}</td></tr>`)).join('')}
+    </tbody></table></div>
+    <div class="actions"><button class="btn" onclick="closeModal();toast('Preuzeto: Plan-2027_final.xlsx')">Preuzmi</button></div>`);
+}
+
+/* --- plan grid (komercijalista / own plan / team review) --- */
+function viewPlan(u, {own, review=false}){
+  const user=S.users[u];
+  const canEditOwn = own && isOpen();
+  const canReview = review && isOpen();
+  let html=`<section class="panel">
+    <div class="panel-h"><h2>${own?'Moj plan prodaje':'Plan – '+user.name}</h2>
+      <span class="note">${own?'Unesi količine po mesecu za SKU koje prodaješ svojim kupcima. Prazno = 0. Čuva se automatski.':'Koriguj količine direktno u ćeliji ili ostavi komentar na ćeliju, pa vrati ili odobri.'}</span></div>
+    <div class="panel-b">`;
+  if(!isOpen()) html+=`<div class="warn-box">Ciklus je ${S.cycle.status}. Unos i izmene nisu moguće.</div>`;
+  S.batches.forEach(b=>{
+    const st=approval(u,b.no);
+    const editable = (canEditOwn && (st==='draft'||st==='vraceno')) || (canReview && st==='poslato');
+    html+=`<div class="row" style="margin:6px 0 8px"><h3>Slanje #${b.no}</h3><span class="kv">${new Date(b.date).toLocaleDateString('sr-RS')} · ${b.skus.length} SKU</span> ${pill(st)}<span class="spacer"></span>`;
+    if(own && isOpen()){
+      if(st==='draft'||st==='vraceno') html+=`<button class="btn red sm" onclick="send('${u}',${b.no})">Pošalji ${user.role==='vodja'?'direktoru':'vođi'}</button>`;
+      if(st==='poslato') html+=`<span class="kv">Čeka odobrenje</span>`;
+    }
+    if(review && isOpen() && st==='poslato'){
+      html+=`<button class="btn ghost sm" onclick="giveBack('${u}',${b.no})">Vrati sa komentarom</button> <button class="btn sm" onclick="approve('${u}',${b.no})">Odobri</button>`;
+    }
+    html+=`</div><div class="scroll"><table><thead><tr><th>SKU</th>${MONTHS.map(m=>`<th class="num">${MLABEL(m)}</th>`).join('')}<th class="num total">Total</th></tr></thead><tbody>`;
+    b.skus.forEach(s=>{
+      html+=`<tr><td class="sku">${s}</td>`;
+      MONTHS.forEach(m=>{
+        const r=raw(u,s,m), c=corrOf(u,s,m), cs=cmts(u,s,m);
+        const val=c?c.qty:(r??'');
+        html+=`<td class="num"><div class="cell">
+          <input class="qty ${c?'corr':''}" type="number" min="0" step="1" value="${val}" ${editable?'':'disabled'} data-u="${u}" data-s="${s}" data-m="${m}" data-review="${review?1:0}" oninput="onQty(this)" aria-label="${s} ${MLABEL(m)}">
+          ${c?`<span class="orig">${fmt(r||0)} · ${S.users[c.by].name}</span>`:''}
+          ${(review&&editable)||cs.length?`<button class="cm ${cs.length?'has':''}" title="Komentar" onclick="openComment('${u}','${s}','${m}')">${cs.length?cs.length+' ✎':'✎'}</button>`:''}
+        </div></td>`;
+      });
+      html+=`<td class="num total" id="tot-${u}-${s}">${fmt(rowTotal(u,s))}</td></tr>`;
+      // comments under row
+      const rowC=MONTHS.flatMap(m=>cmts(u,s,m).map(x=>({m,...x})));
+      if(rowC.length) html+=`<tr><td colspan="${MONTHS.length+2}" style="white-space:normal;padding-top:0"><div class="comments">${rowC.map(x=>`<div><strong>${S.users[x.by].name}</strong> · ${MLABEL(x.m)}: ${esc(x.text)}</div>`).join('')}</div></td></tr>`;
+    });
+    html+=`</tbody></table></div>`;
+  });
+  html+=`</div></section>`;
+  return html;
+}
+function onQty(inp){
+  const {u,s,m,review}=inp.dataset; const v=inp.value===''?null:Math.max(0,parseInt(inp.value,10)||0);
+  if(review==='1'){
+    S.corr[u]??={}; S.corr[u][s]??={};
+    if(v===null || v===(raw(u,s,m)||0)) delete S.corr[u][s][m]; else S.corr[u][s][m]={qty:v,by:S.ui.who};
+    inp.classList.toggle('corr', !!S.corr[u][s][m]);
+  } else {
+    S.plan[u]??={}; S.plan[u][s]??={}; S.plan[u][s][m]=v;
+  }
+  const t=document.getElementById(`tot-${u}-${s}`); if(t) t.textContent=fmt(rowTotal(u,s));
+}
+function send(u,b){
+  const filled=S.batches.find(x=>x.no===b).skus.some(s=>rowTotal(u,s)>0);
+  if(!filled && !confirm('Nijedan SKU iz ovog slanja nema količinu. Poslati kao 0?')) return;
+  setApproval(u,b,'poslato'); logIt(`${S.users[u].name} poslao plan (batch #${b})`); render(); toast('Plan poslat na odobrenje');
+}
+function openComment(u,s,m){
+  const list=cmts(u,s,m);
+  modal(`<h2>${s} · ${MLABEL(m)}</h2><p class="plain">Plan ${S.users[u].name}: <strong>${fmt(eff(u,s,m))}</strong></p>
+    ${list.length?`<div class="comments" style="margin-bottom:12px">${list.map(x=>`<div><strong>${S.users[x.by].name}</strong>: ${esc(x.text)}</div>`).join('')}</div>`:''}
+    ${me().role==='vodja'&&isOpen()?`<textarea id="cmTa" placeholder="Npr. da li si siguran da ćeš ovu količinu prodati u martu?"></textarea>
+    <div class="actions"><button class="btn ghost" onclick="closeModal()">Zatvori</button><button class="btn red" onclick="addComment('${u}','${s}','${m}')">Dodaj komentar</button></div>`
+    :`<div class="actions"><button class="btn ghost" onclick="closeModal()">Zatvori</button></div>`}`);
+}
+function addComment(u,s,m){
+  const t=$('#cmTa').value.trim(); if(!t){toast('Komentar je prazan');return;}
+  S.comments[u]??={}; S.comments[u][s]??={}; S.comments[u][s][m]??=[]; S.comments[u][s][m].push({by:S.ui.who,text:t});
+  closeModal(); render(); toast('Komentar dodat');
+}
+function giveBack(u,b){
+  const has=S.batches.find(x=>x.no===b).skus.some(s=>MONTHS.some(m=>cmts(u,s,m).length));
+  if(!has){ toast('Vraćanje zahteva bar jedan komentar na ćeliju (✎).'); return; }
+  setApproval(u,b,'vraceno'); logIt(`${me().name} vratio plan ${S.users[u].name} (batch #${b})`); render(); toast('Plan vraćen na doradu');
+}
+function approve(u,b){
+  setApproval(u,b,'odobreno'); logIt(`${me().name} odobrio plan ${S.users[u].name} (batch #${b})`); render(); toast('Plan odobren');
+}
+
+/* --- Milan --- */
+function viewVodja(){
+  const team=teamOf(S.ui.who);
+  let html=`<div class="tabs"><button class="${S.ui.tab==='tim'?'on':''}" onclick="S.ui.tab='tim';render()">Moj tim</button><button class="${S.ui.tab==='moj'?'on':''}" onclick="S.ui.tab='moj';render()">Moj plan</button></div>`;
+  if(S.ui.tab==='moj') return html+viewPlan(S.ui.who,{own:true});
+  html+=`<section class="panel"><div class="panel-h"><h2>Status tima</h2></div><div class="panel-b scroll">
+    <table class="status-grid"><thead><tr><th>Komercijalista</th>${S.batches.map(b=>`<th>Slanje #${b.no}</th>`).join('')}<th class="num">Ukupno planirano</th></tr></thead><tbody>
+    ${team.map(u=>`<tr><td><button class="btn ghost sm" onclick="S.ui.teamSel='${u}';render()" ${S.ui.teamSel===u?'style="border-color:var(--red)"':''}>${S.users[u].name}</button></td>${S.batches.map(b=>`<td>${pill(approval(u,b.no))}</td>`).join('')}<td class="num">${fmt(allSkus().reduce((a,s)=>a+rowTotal(u,s),0))}</td></tr>`).join('')}
+    </tbody></table></div></section>`;
+  html+=viewPlan(S.ui.teamSel,{own:false,review:true});
+  return html;
+}
+
+/* --- Pop --- */
+function viewDirektor(){
+  const st=S.cycle.status;
+  let html=`<section class="panel"><div class="panel-h"><h2>Upravljanje ciklusom</h2><span class="note">Rok važi za sva slanja u ciklusu. Po isteku roka ciklus se zaključava automatski.</span></div>
+    <div class="panel-b row">
+      <label class="field">Rok za unos <input type="date" value="${S.cycle.deadline}" ${st==='otvoren'?'':'disabled'} onchange="S.cycle.deadline=this.value;logIt('Pop promenio rok na '+this.value);toast('Rok sačuvan')"></label>
+      <span class="spacer"></span>
+      ${st==='otvoren'?`<button class="btn ghost" onclick="lock(true)">Simuliraj istek roka</button><button class="btn" onclick="lock()">Zaključaj ciklus</button>`:''}
+      ${st==='zakljucan'?`<button class="btn ghost" onclick="unlock()">Otključaj radi ispravke</button><button class="btn red" onclick="finalize()">Finalno odobri i pošalji nabavci</button>`:''}
+      ${st==='finalizovan'?`<span class="ok-box" style="margin:0">Plan je finalizovan i dostupan nabavci za export.</span>`:''}
+    </div></section>`;
+  // status grid
+  html+=`<section class="panel"><div class="panel-h"><h2>Ko je poslao</h2><span class="note">Neposlati planovi ulaze u konsolidaciju sa trenutnim vrednostima i označeni su.</span></div><div class="panel-b scroll">
+    <table class="status-grid"><thead><tr><th>Prodavac</th><th>Vođa</th>${S.batches.map(b=>`<th>Slanje #${b.no}</th>`).join('')}<th class="num">Ukupno</th></tr></thead><tbody>
+    ${planners().map(u=>`<tr><td>${S.users[u].name}${S.users[u].role==='vodja'?' <span class="kv">(vođa)</span>':''}</td><td>${S.users[S.users[u].vodja].name}</td>${S.batches.map(b=>{const a=approval(u,b.no); const isVodja=S.users[u].role==='vodja'; return `<td>${pill(a)}${isVodja&&a==='poslato'&&isOpen()?` <button class="btn sm" onclick="approve('${u}',${b.no})">Odobri</button>`:''}</td>`;}).join('')}<td class="num">${fmt(allSkus().reduce((a,s)=>a+rowTotal(u,s),0))}</td></tr>`).join('')}
+    </tbody></table></div></section>`;
+  // consolidation
+  html+=`<section class="panel"><div class="panel-h"><h2>Konsolidovani plan</h2><span class="note">Klikni na SKU da vidiš ko čini zbir.</span></div><div class="panel-b scroll">${consolTable(true)}</div></section>`;
+  return html;
+}
+function consolTable(expandable){
+  let h=`<table><thead><tr><th>SKU</th>${MONTHS.map(m=>`<th class="num">${MLABEL(m)}</th>`).join('')}<th class="num total">Total</th></tr></thead><tbody>`;
+  const grand=MONTHS.map(()=>0); let grandT=0;
+  S.batches.forEach(b=>{
+    if(S.batches.length>1) h+=`<tr class="batch-row"><td colspan="${MONTHS.length+2}">Slanje #${b.no} · ${new Date(b.date).toLocaleDateString('sr-RS')}</td></tr>`;
+    b.skus.forEach(s=>{
+      const vals=MONTHS.map(m=>consolidated(s,m)); const t=vals.reduce((a,x)=>a+x,0);
+      vals.forEach((v,i)=>grand[i]+=v); grandT+=t;
+      const ex=S.ui.expanded[s];
+      h+=`<tr><td class="sku">${expandable?`<button class="expand" onclick="S.ui.expanded['${s}']=!S.ui.expanded['${s}'];render()" aria-label="Proširi">${ex?'▾':'▸'}</button>`:''}${s}${t===0?' <span class="pill red">nije planiran</span>':''}</td>${vals.map(v=>`<td class="num">${fmt(v)}</td>`).join('')}<td class="num total">${fmt(t)}</td></tr>`;
+      if(expandable&&ex){
+        planners().forEach(u=>{ const rt=rowTotal(u,s); if(!rt) return;
+          const notSent=S.batches.some(bb=>bb.skus.includes(s)&&approval(u,bb.no)!=='odobreno');
+          h+=`<tr class="sub-row"><td class="sku">${S.users[u].name}${notSent?' <span class="pill red">nije odobreno</span>':''}</td>${MONTHS.map(m=>`<td class="num">${fmt(eff(u,s,m))}</td>`).join('')}<td class="num total">${fmt(rt)}</td></tr>`;
+        });
+      }
+    });
+  });
+  h+=`<tr><td class="total">Ukupno</td>${grand.map(v=>`<td class="num total">${fmt(v)}</td>`).join('')}<td class="num total">${fmt(grandT)}</td></tr></tbody></table>`;
+  return h;
+}
+function lock(sim){ S.cycle.status='zakljucan'; logIt(sim?'Rok istekao – ciklus automatski zaključan':'Pop zaključao ciklus'); render(); toast(sim?'Rok istekao, ciklus zaključan':'Ciklus zaključan'); }
+function unlock(){ S.cycle.status='otvoren'; logIt('Pop otključao ciklus radi ispravke'); render(); toast('Ciklus otključan'); }
+function finalize(){
+  const pending=planners().filter(u=>S.batches.some(b=>approval(u,b.no)!=='odobreno'));
+  if(pending.length && !confirm(`Nisu odobreni planovi: ${pending.map(u=>S.users[u].name).join(', ')}. Ulaze sa trenutnim vrednostima. Finalizovati?`)) return;
+  S.cycle.status='finalizovan'; logIt('Pop finalno odobrio plan – poslato nabavci'); render(); toast('Plan finalizovan i poslat nabavci');
+}
+
+/* --- log --- */
+function viewLog(){
+  return `<section class="panel"><div class="panel-h"><h3>Istorija (audit log)</h3></div><div class="panel-b log">${S.log.map(l=>`<div>${esc(l)}</div>`).join('')}</div></section>
+  <p class="demo">Prototip: podaci žive samo u ovoj sesiji. Predložen demo tok: Tijana popuni i pošalje → Milan ostavi komentar i vrati / odobri → Mikula pošalje drugo slanje → Pop odobri Milanov plan, simulira istek roka, finalizuje → Mikula preuzme export.</p>`;
+}
+
+/* --- modal --- */
+function modal(html){ $('#modal').innerHTML=html; $('#backdrop').classList.add('on'); const f=$('#modal textarea, #modal input, #modal button'); f&&f.focus(); }
+function closeModal(){ $('#backdrop').classList.remove('on'); }
+$('#backdrop').addEventListener('click',e=>{ if(e.target.id==='backdrop') closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+$('#whoSel').addEventListener('change',e=>{ S.ui.who=e.target.value; S.ui.tab='tim'; const t=teamOf(S.ui.who); if(t.length) S.ui.teamSel=t[0]; render(); });
+
+render();
+</script>
+</body>
+</html>
