@@ -26,7 +26,7 @@
         <span class="spacer"></span>
         @if (CurrentUser.IsAuthenticated)
         {
-            <form class="who" method="post" action="/Account/Logout">
+            <form class="who" method="post" asp-page="/Account/Logout">
                 <span>@CurrentUser.DisplayName</span>
                 <button type="submit" class="btn ghost sm on-dark">Odjava</button>
             </form>
