@@ -1,8 +1,21 @@
-@if (TempData["Message"] is string message)
-{
-    <div class="ok-box" role="status">@message</div>
+@* TempData keys: Message (ok), Warning, Error. Multiple lines are separated by \n and rendered as a list. *@
+@{
+    var boxes = new[] { ("Message", "ok-box", "status"), ("Warning", "warn-box", "status"), ("Error", "err-box", "alert") };
 }
-@if (TempData["Error"] is string error)
+@foreach (var (key, css, role) in boxes)
 {
-    <div class="err-box" role="alert">@error</div>
+    if (TempData[key] is string text)
+    {
+        var lines = text.Split('\n');
+        <div class="@css" role="@role">
+            @if (lines.Length == 1)
+            {
+                @lines[0]
+            }
+            else
+            {
+                <ul>@foreach (var line in lines) { <li>@line</li> }</ul>
+            }
+        </div>
+    }
 }

@@ -17,8 +17,13 @@
         @if (CurrentUser.IsAuthenticated)
         {
             <nav class="nav">
+                @if (CurrentUser.IsInRole(Roles.Procurement))
+                {
+                    <a href="/Procurement">Slanje SKU</a>
+                }
                 @if (CurrentUser.IsInRole(Roles.Director))
                 {
+                    <a href="/Director/Cycles">Ciklusi</a>
                     <a href="/Admin/Users">Korisnici</a>
                 }
             </nav>

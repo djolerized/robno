@@ -1,0 +1,104 @@
+@page "{cycleId:int?}"
+@model Textil.Planning.Pages.Procurement.IndexModel
+@{
+    ViewData["Title"] = "Slanje SKU";
+    var cycle = Model.Cycle;
+}
+
+<partial name="_StatusMessage" />
+
+@if (cycle is null)
+{
+    <section class="panel">
+        <div class="panel-h"><h2>Slanje SKU prodaji</h2></div>
+        <div class="panel-b"><p class="plain">Još nema ciklusa. Ciklus otvara direktor prodaje.</p></div>
+    </section>
+    return;
+}
+
+<div class="cycle-bar">
+    <h1>@cycle.Name</h1>
+    <span class="pill @Display.PillClass(cycle.Status)">@Display.Label(cycle.Status)</span>
+    <span class="kv">Period <strong>@Display.Period(cycle.Months)</strong></span>
+    <span class="kv">Rok za unos <strong>@Model.Time.Format(cycle.Deadline)</strong></span>
+    <span class="kv">SKU u ciklusu <strong>@cycle.SkuCount</strong> u @cycle.BatchCount @(cycle.BatchCount == 1 ? "slanju" : "slanja")</span>
+    @if (Model.Cycles.Count > 1)
+    {
+        <span class="spacer"></span>
+        <form method="get" class="row inline" action="/Procurement">
+            <select name="cycleId" aria-label="Ciklus" class="input">
+                @foreach (var c in Model.Cycles)
+                {
+                    <option value="@c.Id" selected="@(c.Id == cycle.Id)">@c.Name · @Display.Label(c.Status)</option>
+                }
+            </select>
+            <button type="submit" class="btn ghost sm">Prikaži</button>
+        </form>
+    }
+</div>
+
+<section class="panel">
+    <div class="panel-h">
+        <h2>Slanje SKU prodaji</h2>
+        <span class="note">
+            Excel (.xlsx), prvi sheet: kolona A „SKU“, zatim po kolona za svaki mesec u formatu YYYY-MM.
+            @if (cycle.Months.Count > 0)
+            {
+                <text>Meseci ovog ciklusa: <strong>@cycle.Months[0] … @cycle.Months[^1]</strong>.</text>
+            }
+            else
+            {
+                <text>Prvo slanje određuje mesece ciklusa.</text>
+            }
+        </span>
+    </div>
+    <div class="panel-b">
+        @if (!Model.CanUpload)
+        {
+            <div class="warn-box">
+                @(cycle.Status == Textil.Planning.Data.CycleStatus.Open ? "Rok za unos je istekao" : "Ciklus nije otvoren") — nova slanja nisu moguća.
+            </div>
+        }
+        <form method="post" enctype="multipart/form-data" asp-page-handler="Upload" asp-route-cycleId="@cycle.Id" class="row">
+            <label class="field">Fajl
+                <input type="file" name="upload" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                       required disabled="@(!Model.CanUpload)">
+            </label>
+            <button type="submit" class="btn red" disabled="@(!Model.CanUpload)">Pošalji nove SKU</button>
+        </form>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-h"><h2>Istorija slanja</h2></div>
+    <div class="panel-b scroll">
+        @if (Model.Batches.Count == 0)
+        {
+            <p class="plain">U ovaj ciklus još ništa nije poslato.</p>
+        }
+        else
+        {
+            <table>
+                <thead><tr><th>Slanje</th><th>Datum</th><th>Poslao</th><th class="num">SKU</th><th>Šifre</th><th>Originalni fajl</th></tr></thead>
+                <tbody>
+                    @foreach (var b in Model.Batches)
+                    {
+                        <tr>
+                            <td class="sku">#@b.Number</td>
+                            <td>@Model.Time.Format(b.UploadedAt)</td>
+                            <td>@b.UploadedBy</td>
+                            <td class="num">@b.Codes.Count</td>
+                            <td class="wrap-cell">
+                                <details>
+                                    <summary>@string.Join(", ", b.Codes.Take(3))@(b.Codes.Count > 3 ? " …" : "")</summary>
+                                    @string.Join(", ", b.Codes)
+                                </details>
+                            </td>
+                            <td><a href="/Batches/File/@b.Id">@b.OriginalFileName</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</section>

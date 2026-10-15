@@ -34,4 +34,23 @@ public class DevSeederTests
             Assert.True(await userManager.CheckPasswordAsync(user, TestServices.Password), userName);
         }
     }
+
+    [Fact]
+    public async Task Seeds_open_cycle_with_first_batch_once()
+    {
+        await using var t = await TestServices.CreateAsync();
+        for (var i = 0; i < 2; i++)
+        {
+            await DevSeeder.SeedCycleAsync(t.Get<AppDbContext>(), t.Get<UserManager<User>>(),
+                t.Get<CycleService>(), t.Get<ImportService>(), TimeProvider.System);
+        }
+
+        var db = t.Get<AppDbContext>();
+        var cycle = await db.Cycles.Include(c => c.Months).SingleAsync();
+        Assert.Equal("Plan 2027", cycle.Name);
+        Assert.Equal(CycleStatus.Open, cycle.Status);
+        Assert.Equal(6, cycle.Months.Count);
+        Assert.Equal(DevSeeder.SeedSkus, await db.CycleSkus.OrderBy(s => s.Order).Select(s => s.Code).ToListAsync());
+        Assert.Equal(3, await db.Approvals.CountAsync());
+    }
 }

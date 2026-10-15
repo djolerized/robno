@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Textil.Planning.Domain;
 
 namespace Textil.Planning.Data;
 
@@ -20,6 +21,12 @@ public static class DatabaseInitializer
             var password = app.Configuration["Seed:Password"]
                 ?? throw new InvalidOperationException("Seed:Password is not configured.");
             await DevSeeder.SeedUsersAsync(services.GetRequiredService<UserManager<User>>(), password);
+            await DevSeeder.SeedCycleAsync(
+                services.GetRequiredService<AppDbContext>(),
+                services.GetRequiredService<UserManager<User>>(),
+                services.GetRequiredService<CycleService>(),
+                services.GetRequiredService<ImportService>(),
+                services.GetRequiredService<TimeProvider>());
         }
     }
 }

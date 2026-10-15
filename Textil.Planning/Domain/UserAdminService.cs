@@ -11,7 +11,7 @@ public sealed record UserSummary(
     string Id, string UserName, string DisplayName, string? Email, IReadOnlySet<string> Roles, string? ManagerId);
 
 /// <summary>User and hierarchy administration. Only the Director may use it.</summary>
-public class UserAdminService(AppDbContext db, UserManager<User> userManager, IAuditService audit)
+public class UserAdminService(AppDbContext db, UserManager<User> userManager, AccessGuard access, IAuditService audit)
 {
     public async Task<IReadOnlyList<UserSummary>> ListAsync(string actorId)
     {
@@ -99,16 +99,7 @@ public class UserAdminService(AppDbContext db, UserManager<User> userManager, IA
         await tx.CommitAsync();
     }
 
-    private async Task EnsureDirectorAsync(string actorId)
-    {
-        var isDirector = await (
-            from ur in db.UserRoles
-            join r in db.Roles on ur.RoleId equals r.Id
-            where ur.UserId == actorId && r.Name == Roles.Director
-            select ur).AnyAsync();
-        if (!isDirector)
-            throw new PermissionDeniedException();
-    }
+    private Task EnsureDirectorAsync(string actorId) => access.EnsureAnyRoleAsync(actorId, Roles.Director);
 
     private async Task<IReadOnlyList<UserSummary>> LoadUsersAsync()
     {

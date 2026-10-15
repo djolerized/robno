@@ -90,6 +90,12 @@ td .pill + .pill { margin-left: 4px; }
 .input-validation-error { border-color: var(--red) !important; }
 
 .login { max-width: 420px; margin: 40px auto; }
+.row.inline { align-items: center; gap: 8px; margin: 0; }
+.input { padding: 5px 8px; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); font-size: 14px; }
+.field input[type="file"] { padding: 5px; }
+td.wrap-cell { white-space: normal; max-width: 460px; font-size: 13px; color: var(--ink-2); }
+details summary { cursor: pointer; }
+details[open] summary { margin-bottom: 4px; }
 
 /* hierarchy */
 .tree, .tree ul { list-style: none; margin: 0; padding-left: 0; }

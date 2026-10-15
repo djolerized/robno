@@ -39,7 +39,10 @@ public sealed class TestServices : IAsyncDisposable
             .AddErrorDescriber<SerbianIdentityErrorDescriber>();
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<AccessGuard>();
         services.AddScoped<UserAdminService>();
+        services.AddScoped<CycleService>();
+        services.AddScoped<ImportService>();
 
         var test = new TestServices(connection, services.BuildServiceProvider());
         await test.Get<AppDbContext>().Database.EnsureCreatedAsync();

@@ -19,12 +19,39 @@
 </div>
 
 <section class="panel">
-    <div class="panel-h"><h2>Vaši zadaci</h2></div>
+    <div class="panel-h"><h2>Otvoreni ciklusi</h2></div>
     <div class="panel-b">
-        @if (Model.Roles.Contains(Roles.Director))
+        @if (Model.OpenCycles.Count == 0)
         {
-            <p><a class="btn" href="/Admin/Users">Administracija korisnika i hijerarhije</a></p>
+            <p class="plain">Nema otvorenih ciklusa planiranja.</p>
         }
-        <p class="plain">Nema otvorenih ciklusa planiranja.</p>
+        else
+        {
+            <table>
+                <thead><tr><th>Ciklus</th><th>Period</th><th>Rok za unos</th><th class="num">SKU</th></tr></thead>
+                <tbody>
+                    @foreach (var c in Model.OpenCycles)
+                    {
+                        <tr>
+                            <td class="sku">@c.Name</td>
+                            <td>@Display.Period(c.Months)</td>
+                            <td>@Model.Time.Format(c.Deadline)</td>
+                            <td class="num">@c.SkuCount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        <p class="row" style="margin-top:14px">
+            @if (Model.Roles.Contains(Roles.Procurement))
+            {
+                <a class="btn" href="/Procurement">Slanje SKU prodaji</a>
+            }
+            @if (Model.Roles.Contains(Roles.Director))
+            {
+                <a class="btn" href="/Director/Cycles">Ciklusi</a>
+                <a class="btn ghost" href="/Admin/Users">Korisnici i hijerarhija</a>
+            }
+        </p>
     </div>
 </section>

@@ -1,0 +1,70 @@
+@page
+@model Textil.Planning.Pages.Director.Cycles.IndexModel
+@{
+    ViewData["Title"] = "Ciklusi";
+}
+
+<partial name="_StatusMessage" />
+
+<section class="panel">
+    <div class="panel-h">
+        <h2>Novi ciklus</h2>
+        <span class="note">Meseci ciklusa se preuzimaju iz prvog fajla koji pošalje nabavka. Po isteku roka ciklus se zaključava.</span>
+    </div>
+    <div class="panel-b">
+        <form method="post" asp-page-handler="Create" class="row">
+            <label class="field">Naziv
+                <input asp-for="NewName" placeholder="npr. Plan 2027" maxlength="@CycleService.NameMaxLength" required>
+            </label>
+            <label class="field">Rok za unos
+                <input asp-for="NewDeadline" type="datetime-local" required>
+            </label>
+            <button type="submit" class="btn red">Kreiraj ciklus</button>
+        </form>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-h"><h2>Ciklusi</h2></div>
+    <div class="panel-b scroll">
+        @if (Model.Cycles.Count == 0)
+        {
+            <p class="plain">Još nema ciklusa.</p>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr><th>Naziv</th><th>Status</th><th>Period</th><th class="num">Slanja</th><th class="num">SKU</th><th>Rok za unos</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.Cycles)
+                    {
+                        <tr>
+                            <td class="sku">@c.Name</td>
+                            <td><span class="pill @Display.PillClass(c.Status)">@Display.Label(c.Status)</span></td>
+                            <td>@Display.Period(c.Months)</td>
+                            <td class="num">@c.BatchCount</td>
+                            <td class="num">@c.SkuCount</td>
+                            <td>
+                                @if (c.Status == Textil.Planning.Data.CycleStatus.Open)
+                                {
+                                    <form method="post" asp-page-handler="Deadline" asp-route-cycleId="@c.Id" class="row inline">
+                                        <input name="deadline" type="datetime-local" class="input"
+                                               value="@Model.Time.ToLocal(c.Deadline).ToString("yyyy-MM-ddTHH:mm")" required
+                                               aria-label="Rok za @c.Name">
+                                        <button type="submit" class="btn ghost sm">Promeni rok</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    @Model.Time.Format(c.Deadline)
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</section>

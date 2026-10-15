@@ -155,6 +155,48 @@ namespace Textil.Planning.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Textil.Planning.Data.Approval", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BatchId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ChangedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChangedById");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("BatchId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("Approvals");
+                });
+
             modelBuilder.Entity("Textil.Planning.Data.AuditLog", b =>
                 {
                     b.Property<long>("Id")
@@ -199,6 +241,139 @@ namespace Textil.Planning.Data.Migrations
                     b.HasIndex("Entity", "EntityId");
 
                     b.ToTable("AuditLogs");
+                });
+
+            modelBuilder.Entity("Textil.Planning.Data.Batch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CycleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("OriginalFile")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UploadedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UploadedById");
+
+                    b.HasIndex("CycleId", "Number")
+                        .IsUnique();
+
+                    b.ToTable("Batches");
+                });
+
+            modelBuilder.Entity("Textil.Planning.Data.Cycle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Deadline")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FinalizedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Cycles");
+                });
+
+            modelBuilder.Entity("Textil.Planning.Data.CycleMonth", b =>
+                {
+                    b.Property<int>("CycleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Month")
+                        .HasMaxLength(7)
+                        .HasColumnType("nchar(7)")
+                        .IsFixedLength();
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.HasKey("CycleId", "Month");
+
+                    b.ToTable("CycleMonths");
+                });
+
+            modelBuilder.Entity("Textil.Planning.Data.CycleSku", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BatchId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("CycleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BatchId");
+
+                    b.HasIndex("CycleId", "Code")
+                        .IsUnique();
+
+                    b.HasIndex("CycleId", "Order");
+
+                    b.ToTable("CycleSkus");
                 });
 
             modelBuilder.Entity("Textil.Planning.Data.User", b =>
@@ -327,12 +502,84 @@ namespace Textil.Planning.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Textil.Planning.Data.Approval", b =>
+                {
+                    b.HasOne("Textil.Planning.Data.Batch", null)
+                        .WithMany("Approvals")
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Textil.Planning.Data.User", null)
+                        .WithMany()
+                        .HasForeignKey("ChangedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Textil.Planning.Data.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Textil.Planning.Data.AuditLog", b =>
                 {
                     b.HasOne("Textil.Planning.Data.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Textil.Planning.Data.Batch", b =>
+                {
+                    b.HasOne("Textil.Planning.Data.Cycle", "Cycle")
+                        .WithMany("Batches")
+                        .HasForeignKey("CycleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Textil.Planning.Data.User", "UploadedBy")
+                        .WithMany()
+                        .HasForeignKey("UploadedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Cycle");
+
+                    b.Navigation("UploadedBy");
+                });
+
+            modelBuilder.Entity("Textil.Planning.Data.Cycle", b =>
+                {
+                    b.HasOne("Textil.Planning.Data.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Textil.Planning.Data.CycleMonth", b =>
+                {
+                    b.HasOne("Textil.Planning.Data.Cycle", null)
+                        .WithMany("Months")
+                        .HasForeignKey("CycleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Textil.Planning.Data.CycleSku", b =>
+                {
+                    b.HasOne("Textil.Planning.Data.Batch", null)
+                        .WithMany("Skus")
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Textil.Planning.Data.Cycle", null)
+                        .WithMany()
+                        .HasForeignKey("CycleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Textil.Planning.Data.User", b =>
@@ -343,6 +590,20 @@ namespace Textil.Planning.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Manager");
+                });
+
+            modelBuilder.Entity("Textil.Planning.Data.Batch", b =>
+                {
+                    b.Navigation("Approvals");
+
+                    b.Navigation("Skus");
+                });
+
+            modelBuilder.Entity("Textil.Planning.Data.Cycle", b =>
+                {
+                    b.Navigation("Batches");
+
+                    b.Navigation("Months");
                 });
 #pragma warning restore 612, 618
         }

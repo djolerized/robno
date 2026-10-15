@@ -23,4 +23,8 @@
     <ProjectReference Include="..\Textil.Planning\Textil.Planning.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\doc\primer-EXPORT_nabavka-salje-prodaji.xlsx" Link="Samples\sku-upload.xlsx" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
