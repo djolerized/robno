@@ -18,24 +18,33 @@
 
 <div class="cycle-bar">
     <h1>@cycle.Name</h1>
-    <span class="pill @Display.PillClass(cycle.Status)">@Display.Label(cycle.Status)</span>
+    <span class="pill @Display.PillClass(cycle.ProcurementStage)">@Display.Label(cycle.ProcurementStage)</span>
     <span class="kv">Period <strong>@Display.Period(cycle.Months)</strong></span>
     <span class="kv">Rok za unos <strong>@Model.Time.Format(cycle.Deadline)</strong></span>
     <span class="kv">SKU u ciklusu <strong>@cycle.SkuCount</strong> u @cycle.BatchCount @(cycle.BatchCount == 1 ? "slanju" : "slanja")</span>
-    @if (Model.Cycles.Count > 1)
-    {
-        <span class="spacer"></span>
-        <form method="get" class="row inline" action="/Procurement">
-            <select name="cycleId" aria-label="Ciklus" class="input">
+</div>
+
+<section class="panel">
+    <div class="panel-h"><h2>Ciklusi</h2></div>
+    <div class="panel-b scroll">
+        <table>
+            <thead><tr><th>Ciklus</th><th>Status</th><th>Period</th><th>Rok za unos</th><th class="num">Slanja</th><th class="num">SKU</th></tr></thead>
+            <tbody>
                 @foreach (var c in Model.Cycles)
                 {
-                    <option value="@c.Id" selected="@(c.Id == cycle.Id)">@c.Name · @Display.Label(c.Status)</option>
+                    <tr class="@(c.Id == cycle.Id ? "current" : null)">
+                        <td class="sku"><a href="/Procurement/@c.Id">@c.Name</a></td>
+                        <td><span class="pill @Display.PillClass(c.ProcurementStage)">@Display.Label(c.ProcurementStage)</span></td>
+                        <td>@Display.Period(c.Months)</td>
+                        <td>@Model.Time.Format(c.Deadline)</td>
+                        <td class="num">@c.BatchCount</td>
+                        <td class="num">@c.SkuCount</td>
+                    </tr>
                 }
-            </select>
-            <button type="submit" class="btn ghost sm">Prikaži</button>
-        </form>
-    }
-</div>
+            </tbody>
+        </table>
+    </div>
+</section>
 
 <section class="panel">
     <div class="panel-h">

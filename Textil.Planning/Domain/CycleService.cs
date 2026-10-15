@@ -5,7 +5,10 @@ using Textil.Planning.Services;
 namespace Textil.Planning.Domain;
 
 public sealed record CycleSummary(
-    int Id, string Name, CycleStatus Status, DateTime Deadline, IReadOnlyList<string> Months, int BatchCount, int SkuCount);
+    int Id, string Name, CycleStatus Status, DateTime Deadline, IReadOnlyList<string> Months, int BatchCount, int SkuCount)
+{
+    public ProcurementStage ProcurementStage => ProcurementStages.Of(Status, BatchCount);
+}
 
 public sealed record BatchSummary(
     int Id, int Number, DateTime UploadedAt, string UploadedBy, string OriginalFileName, IReadOnlyList<string> Codes);

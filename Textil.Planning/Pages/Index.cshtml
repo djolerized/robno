@@ -2,6 +2,7 @@
 @model Textil.Planning.Pages.IndexModel
 @{
     ViewData["Title"] = "Početna";
+    var isProcurement = Model.Roles.Contains(Roles.Procurement);
 }
 
 <div class="cycle-bar">
@@ -28,12 +29,16 @@
         else
         {
             <table>
-                <thead><tr><th>Ciklus</th><th>Period</th><th>Rok za unos</th><th class="num">SKU</th></tr></thead>
+                <thead><tr><th>Ciklus</th>@if (isProcurement) { <th>Status</th> }<th>Period</th><th>Rok za unos</th><th class="num">SKU</th></tr></thead>
                 <tbody>
                     @foreach (var c in Model.OpenCycles)
                     {
                         <tr>
-                            <td class="sku">@c.Name</td>
+                            <td class="sku">@if (isProcurement) { <a href="/Procurement/@c.Id">@c.Name</a> } else { @c.Name }</td>
+                            @if (isProcurement)
+                            {
+                                <td><span class="pill @Display.PillClass(c.ProcurementStage)">@Display.Label(c.ProcurementStage)</span></td>
+                            }
                             <td>@Display.Period(c.Months)</td>
                             <td>@Model.Time.Format(c.Deadline)</td>
                             <td class="num">@c.SkuCount</td>

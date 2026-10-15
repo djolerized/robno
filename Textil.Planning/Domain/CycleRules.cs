@@ -19,3 +19,25 @@ public static class CycleRules
             throw new DomainException("Rok za unos je istekao — izmene nisu moguće.");
     }
 }
+
+/// <summary>How procurement sees a cycle: new (nothing sent yet), in progress, or closed (finalized).</summary>
+public enum ProcurementStage
+{
+    New,
+    InProgress,
+    Closed,
+}
+
+public static class ProcurementStages
+{
+    /// <summary>
+    /// A cycle is new for procurement while it is Open and has no batch. A Locked cycle can still be unlocked,
+    /// so it stays in progress; only Finalized is closed.
+    /// </summary>
+    public static ProcurementStage Of(CycleStatus status, int batchCount) => status switch
+    {
+        CycleStatus.Finalized => ProcurementStage.Closed,
+        CycleStatus.Open when batchCount == 0 => ProcurementStage.New,
+        _ => ProcurementStage.InProgress,
+    };
+}

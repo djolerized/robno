@@ -22,6 +22,22 @@ public static class Display
         _ => "",
     };
 
+    public static string Label(ProcurementStage stage) => stage switch
+    {
+        ProcurementStage.New => "Novo",
+        ProcurementStage.InProgress => "U radu",
+        ProcurementStage.Closed => "Zatvoreno",
+        _ => stage.ToString(),
+    };
+
+    public static string PillClass(ProcurementStage stage) => stage switch
+    {
+        ProcurementStage.New => "green",
+        ProcurementStage.InProgress => "yellow",
+        ProcurementStage.Closed => "red",
+        _ => "",
+    };
+
     public static string Period(IReadOnlyList<string> months) =>
         months.Count == 0 ? "određuje prvo slanje" : $"{Month.Label(months[0])} – {Month.Label(months[^1])}";
 
