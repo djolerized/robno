@@ -6,13 +6,23 @@ Jezik komunikacije sa korisnikom: srpski. Jezik koda, identifikatora i komentara
 
 ## Stek i okruženje
 
-- ASP.NET Core 8, **Razor Pages** (ne MVC, ne Blazor, ne SPA). Server-rendered + minimalan vanilla JS (autosave tabele, modali). Bez frontend build pipeline-a (bez npm/webpack/vite).
-- EF Core 8 + **SQL Server Express** (već postoji na serveru). Migracije u repou.
+- ASP.NET Core 10 (LTS), **Razor Pages** (ne MVC, ne Blazor, ne SPA). Server-rendered + minimalan vanilla JS (autosave tabele, modali). Bez frontend build pipeline-a (bez npm/webpack/vite). `global.json` u korenu fiksira SDK 10.
+- EF Core 10 + **SQL Server**. Migracije u repou. Ne koristiti T-SQL funkcije novije od SQL Server 2012 u ručnim upitima (`STRING_AGG`, `OPENJSON`, `TRIM`...) — ciljni server može biti SQL 2012 Express.
 - ClosedXML za čitanje/pisanje xlsx; CsvHelper ili ručni writer za CSV.
 - Auth: ASP.NET Identity sa cookie auth, lokalni nalozi. Prijava preko B2B platforme je planirana kasnije — ne implementirati, ali auth držati iza jednog servisa da se može zameniti.
 - Email: SMTP preko `IEmailSender`, podesivo u `appsettings`. U developmentu loguje u konzolu.
-- Hosting: IIS na internom Textil serveru iza VPN-a, isto kao postojeći alat TeamTalk (C#). Deploy = `dotnet publish` → folder. Bez Dockera.
-- Logovanje: Serilog u fajl, dnevna rotacija.
+- Logovanje: Serilog u fajl, dnevna rotacija, putanja iz konfiguracije.
+
+### Hosting — još nije odlučeno
+
+Kandidati: (a) postojeći interni IIS na Windows Server 2012 R2 + SQL 2012 Express, iza Textil VPN-a; (b) novi Windows Server 2022 + SQL 2022 Express; (c) cloud/VPS. Odluka ne sme da utiče na kod, samo na deploy:
+
+- Ništa zavisno od hostinga u kodu: sve putanje, connection string, SMTP i URL preko `appsettings` / environment varijabli.
+- Uploadovani fajlovi se čuvaju u bazi (varbinary), ne na disku.
+- Bez Windows-only API-ja, bez registry-ja, bez zavisnosti od IIS-a (app mora da radi i pod Kestrelom).
+- Deploy = `dotnet publish` → folder; bez Dockera u V1.
+- Ako padne odluka za (a): spustiti na .NET 8 (`global.json`, `TargetFramework` u oba csproj-a) i dodati `UseSqlServer(conn, o => o.UseCompatibilityLevel(110))` — .NET 9/10 ne rade na Server 2012 R2, a EF Core bez compat level 110 generiše SQL koji SQL 2012 ne razume. Server tada treba ASP.NET Core 8 Hosting Bundle i app pool "No Managed Code".
+- Korak 8 (deploy) se radi tek kad je hosting odlučen.
 
 ## Struktura projekta
 
@@ -137,6 +147,6 @@ Uz CSV i xlsx sa dva sheet-a: `Plan` (konsolidacija) i `Po prodavcu` (ista tabel
 5. Direktor: status, konsolidacija, Lock/Unlock/Finalize.
 6. Export CSV + xlsx.
 7. Email notifikacije, hosted service za rok.
-8. Audit log pregled, publish profil za IIS.
+8. Audit log pregled, deploy (publish profil, uputstvo za instalaciju) — tek kad je hosting odlučen.
 
 Domain servisi imaju unit testove (xUnit) za status mašine, matricu dozvola, import validacije i konsolidaciju — to je obavezan minimum. UI testovi nisu obavezni. Pre svakog koraka: `dotnet test` prolazi. Jedan korak = jedan commit sa opisom na engleskom.
