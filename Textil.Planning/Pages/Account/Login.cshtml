@@ -1,0 +1,31 @@
+@page
+@model Textil.Planning.Pages.Account.LoginModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@{
+    ViewData["Title"] = "Prijava";
+}
+
+<section class="panel login">
+    <div class="panel-h"><h1>Prijava</h1></div>
+    <div class="panel-b">
+        @if (Model.Error is not null)
+        {
+            <div class="err-box" role="alert">@Model.Error</div>
+        }
+        <form method="post" class="form">
+            <input type="hidden" asp-for="ReturnUrl">
+            <label class="field">Korisničko ime ili email
+                <input asp-for="Login" autocomplete="username" required autofocus>
+            </label>
+            <label class="field">Lozinka
+                <input asp-for="Password" type="password" autocomplete="current-password" required>
+            </label>
+            <label class="check"><input asp-for="RememberMe"> Zapamti me na ovom računaru</label>
+            <div class="actions"><button type="submit" class="btn red">Prijavi se</button></div>
+        </form>
+        @if (Env.IsDevelopment())
+        {
+            <p class="demo">Development: nalozi <code>mikula</code>, <code>tijana</code>, <code>marko</code>, <code>milan</code>, <code>pop</code>, lozinka <code>Textil123!</code></p>
+        }
+    </div>
+</section>

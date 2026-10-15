@@ -1,0 +1,30 @@
+@page
+@model Textil.Planning.Pages.IndexModel
+@{
+    ViewData["Title"] = "Početna";
+}
+
+<div class="cycle-bar">
+    <h1>Dobrodošli, @Model.DisplayName</h1>
+    <span class="kv">Uloge
+        @foreach (var role in Model.Roles)
+        {
+            <span class="pill">@Roles.Label(role)</span>
+        }
+    </span>
+    @if (Model.ManagerName is not null)
+    {
+        <span class="kv">Plan šaljete na odobrenje <strong>@Model.ManagerName</strong></span>
+    }
+</div>
+
+<section class="panel">
+    <div class="panel-h"><h2>Vaši zadaci</h2></div>
+    <div class="panel-b">
+        @if (Model.Roles.Contains(Roles.Director))
+        {
+            <p><a class="btn" href="/Admin/Users">Administracija korisnika i hijerarhije</a></p>
+        }
+        <p class="plain">Nema otvorenih ciklusa planiranja.</p>
+    </div>
+</section>

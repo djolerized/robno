@@ -1,0 +1,80 @@
+@page
+@model Textil.Planning.Pages.Admin.Users.IndexModel
+@{
+    ViewData["Title"] = "Korisnici";
+}
+
+<partial name="_StatusMessage" />
+
+<section class="panel">
+    <div class="panel-h">
+        <h2>Korisnici</h2>
+        <span class="note">Nema samoregistracije — nalozi se otvaraju ovde.</span>
+        <span class="spacer"></span>
+        <a class="btn red" href="/Admin/Users/Edit">Novi korisnik</a>
+    </div>
+    <div class="panel-b scroll">
+        <table>
+            <thead>
+                <tr><th>Ime</th><th>Korisničko ime</th><th>Email</th><th>Uloge</th><th>Nadređeni</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model.Users)
+                {
+                    <tr>
+                        <td class="sku">@u.DisplayName</td>
+                        <td>@u.UserName</td>
+                        <td>@u.Email</td>
+                        <td>
+                            @foreach (var role in Roles.All.Where(u.Roles.Contains))
+                            {
+                                <span class="pill">@Roles.Label(role)</span>
+                            }
+                        </td>
+                        <td>@Model.NameOf(u.ManagerId)</td>
+                        <td class="num"><a class="btn ghost sm" href="/Admin/Users/Edit/@u.Id">Izmeni</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-h">
+        <h2>Hijerarhija odobravanja</h2>
+        <span class="note">Komercijalista šalje plan vođi prodaje, vođa prodaje direktoru.</span>
+    </div>
+    <div class="panel-b">
+        <ul class="tree">
+            @foreach (var director in Model.ByRole(Roles.Director))
+            {
+                <li>
+                    <strong>@director.DisplayName</strong> <span class="kv">direktor prodaje</span>
+                    <ul>
+                        @foreach (var lead in Model.SubordinatesOf(director.Id))
+                        {
+                            <li>
+                                <strong>@lead.DisplayName</strong> <span class="kv">vođa prodaje</span>
+                                <ul>
+                                    @foreach (var sales in Model.SubordinatesOf(lead.Id))
+                                    {
+                                        <li>@sales.DisplayName</li>
+                                    }
+                                    @if (!Model.SubordinatesOf(lead.Id).Any())
+                                    {
+                                        <li class="kv">nema komercijalista</li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            }
+        </ul>
+        @if (Model.ByRole(Roles.Procurement).Any())
+        {
+            <p class="kv">Nabavka: @string.Join(", ", Model.ByRole(Roles.Procurement).Select(u => u.DisplayName))</p>
+        }
+    </div>
+</section>

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Textil.Planning.Tests/Textil.Planning.Tests.csproj" />
+  <Project Path="Textil.Planning/Textil.Planning.csproj" />
+</Solution>

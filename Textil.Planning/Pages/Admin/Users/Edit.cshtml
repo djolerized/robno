@@ -1,0 +1,77 @@
+@page "{id?}"
+@model Textil.Planning.Pages.Admin.Users.EditModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Novi korisnik" : "Izmena korisnika";
+}
+
+<p><a href="/Admin/Users">← Svi korisnici</a></p>
+<partial name="_StatusMessage" />
+
+<section class="panel">
+    <div class="panel-h">
+        <h2>@(Model.IsNew ? "Novi korisnik" : Model.Input.DisplayName)</h2>
+        @if (!Model.IsNew)
+        {
+            <span class="note">Korisničko ime: <strong>@Model.UserName</strong></span>
+        }
+    </div>
+    <div class="panel-b">
+        <div asp-validation-summary="All" class="err-box"></div>
+        <form method="post" class="form">
+            @if (Model.IsNew)
+            {
+                <label class="field">Korisničko ime
+                    <input asp-for="UserName" autocomplete="off">
+                </label>
+            }
+            <label class="field">Ime (prikazuje se u alatu)
+                <input asp-for="Input.DisplayName">
+            </label>
+            <label class="field">Email
+                <input asp-for="Input.Email" type="email">
+            </label>
+            <fieldset class="field">
+                <legend>Uloge</legend>
+                @foreach (var role in Roles.All)
+                {
+                    <label class="check">
+                        <input type="checkbox" name="Input.Roles" value="@role" checked="@Model.Input.Roles.Contains(role)">
+                        @Roles.Label(role)
+                    </label>
+                }
+            </fieldset>
+            <label class="field">Nadređeni (kome šalje plan na odobrenje)
+                <select asp-for="Input.ManagerId" asp-items="Model.ManagerOptions">
+                    <option value="">— bez nadređenog —</option>
+                </select>
+                <span class="hint">Komercijalista → vođa prodaje. Vođa prodaje → direktor prodaje. Nabavka i direktor nemaju nadređenog.</span>
+            </label>
+            @if (Model.IsNew)
+            {
+                <label class="field">Početna lozinka
+                    <input asp-for="Password" type="password" autocomplete="new-password">
+                    <span class="hint">Bar 8 znakova, veliko i malo slovo, cifra i specijalni znak.</span>
+                </label>
+            }
+            <div class="actions">
+                <a class="btn ghost" href="/Admin/Users">Otkaži</a>
+                <button type="submit" class="btn red">Sačuvaj</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+@if (!Model.IsNew)
+{
+    <section class="panel">
+        <div class="panel-h"><h3>Nova lozinka</h3><span class="note">Korisnik će biti odjavljen sa svih uređaja.</span></div>
+        <div class="panel-b">
+            <form method="post" asp-page-handler="ResetPassword" class="row">
+                <label class="field">Nova lozinka
+                    <input name="newPassword" type="password" autocomplete="new-password" required>
+                </label>
+                <button type="submit" class="btn">Postavi lozinku</button>
+            </form>
+        </div>
+    </section>
+}
